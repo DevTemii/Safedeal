@@ -1,6 +1,7 @@
 # Environment
 .env.local
 .env*.local
+.env
 
 # Dependencies
 node_modules/
@@ -10,6 +11,7 @@ node_modules/
 # Next.js
 /.next/
 /out/
+.next/
 
 # Production
 /build
