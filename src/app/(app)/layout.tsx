@@ -1,25 +1,11 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { Inter } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 
-import localFont from "next/font/local";
-
-const generalSans = localFont({
-  src: [
-    {
-      path: "../../fonts/GeneralSans-Regular.woff2",
-      weight: "400",
-    },
-    {
-      path: "../../fonts/GeneralSans-Medium.woff2",
-      weight: "500",
-    },
-    {
-      path: "../../fonts/GeneralSans-Bold.woff2",
-      weight: "700",
-    },
-  ],
-  variable: "--font-general-sans",
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export default async function RootLayout({
@@ -37,7 +23,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${generalSans.variable} font-sans`}>
+      <body className={inter.className}>
         {children}
       </body>
     </html>
