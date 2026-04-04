@@ -17,6 +17,10 @@ export function ConnectMiniPayButton() {
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     setAvailability(isMiniPayAvailable() ? "ready" : "unsupported");
   }, []);
 
@@ -25,6 +29,10 @@ export function ConnectMiniPayButton() {
     setIsConnecting(true);
 
     try {
+      if (typeof window === "undefined") {
+        throw new Error("MiniPay connection requires a browser environment.");
+      }
+
       console.log("[SafeDeal] Starting MiniPay connect flow");
 
       const walletAddress = await requestMiniPayAccount();
@@ -95,7 +103,9 @@ export function ConnectMiniPayButton() {
         );
       }
 
-      window.location.assign("/inbox");
+      if (typeof window !== "undefined") {
+        window.location.assign("/inbox");
+      }
     } catch (connectError) {
       console.error("[SafeDeal] Connect flow failed:", connectError);
 
