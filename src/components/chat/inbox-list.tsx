@@ -140,9 +140,9 @@ export function InboxList({ conversations }: InboxListProps) {
             </div>
           </div>
 
-          <div className="mx-[16px] mt-[14px] h-px bg-[#e3e3e3]" />
+          <div className="mx-[16px] mt-[12px] h-px bg-[#e3e3e3]" />
 
-          <div className="px-[14px] pt-[17px]">
+          <div className="space-y-[17px] px-[14px] pt-[17px]">
             {conversations.map((conversation, index) => (
               <InboxListItem
                 conversation={conversation}
