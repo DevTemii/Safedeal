@@ -65,7 +65,7 @@ const fallbackConversations: InboxConversationItemData[] = [
     href: "/inbox",
     initials: "KU",
     lastMessageAt: "2026-04-05T15:33:00.000Z",
-    lastMessagePreview: "Payment is secured, I’m working on it...",
+    lastMessagePreview: "Payment is secured, I'm working on it...",
     unreadCount: 3,
   },
   {
@@ -75,7 +75,7 @@ const fallbackConversations: InboxConversationItemData[] = [
     href: "/inbox",
     initials: "AD",
     lastMessageAt: "2026-04-05T05:09:00.000Z",
-    lastMessagePreview: "I’ve created the deal, please confirm",
+    lastMessagePreview: "I've created the deal, please confirm",
     unreadCount: 1,
   },
   {

@@ -6,6 +6,15 @@ interface InboxListProps {
   conversations: InboxConversationItemData[];
 }
 
+const storyFallbacks = [
+  { avatarSeed: "blessing-cakes", initials: "BC" },
+  { avatarSeed: "tobi-dev", initials: "TD" },
+  { avatarSeed: "kemi-ui", initials: "KU" },
+  { avatarSeed: "ada-designs", initials: "AD" },
+  { avatarSeed: "fauna-blockchain-dev", initials: "FB" },
+  { avatarSeed: "zainab-store", initials: "ZS" },
+];
+
 const storyBackgrounds = [
   "from-[#f7d8c7] via-[#eab188] to-[#d76d35]",
   "from-[#ffb36b] via-[#ef5f2f] to-[#d91e18]",
@@ -81,47 +90,66 @@ function ProfileIcon() {
 }
 
 export function InboxList({ conversations }: InboxListProps) {
-  const storyItems = conversations.slice(0, 6);
+  const storyItems = conversations.slice(0, 6).map((conversation) => ({
+    avatarSeed: conversation.avatarSeed,
+    initials: conversation.initials,
+    key: conversation.conversationId,
+  }));
+
+  for (const fallback of storyFallbacks) {
+    if (storyItems.length >= 6) {
+      break;
+    }
+
+    if (storyItems.some((item) => item.avatarSeed === fallback.avatarSeed)) {
+      continue;
+    }
+
+    storyItems.push({
+      ...fallback,
+      key: `story-fallback-${fallback.avatarSeed}`,
+    });
+  }
 
   return (
     <main className="min-h-screen bg-white text-[#171616]">
       <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col bg-white">
         <div className="flex-1 pb-[92px]">
           <header className="px-[14px] pt-[calc(env(safe-area-inset-top)+50px)]">
-          <h1 className="text-center text-[23px] font-bold leading-none tracking-[-0.02em] text-black">
-            Chats
-          </h1>
+            <h1 className="text-center text-[23px] font-bold leading-none tracking-[-0.02em] text-black">
+              Chats
+            </h1>
 
-          <div className="mt-[18px] flex h-[41px] items-center justify-center rounded-[22px] border border-[#b7b7b7] bg-white">
-            <div className="flex items-center gap-1 text-[#424242]">
-              <svg
-                aria-hidden="true"
-                className="size-4 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="6.25"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
+            <div className="mt-[18px] flex h-[41px] items-center justify-center rounded-[22px] border border-[#b7b7b7] bg-white">
+              <div className="flex items-center gap-1 text-[#424242]">
+                <svg
+                  aria-hidden="true"
+                  className="size-4 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="6.25"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M16 16L20 20"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+                <input
+                  aria-label="Search chats"
+                  className="w-[120px] bg-transparent text-[14px] font-medium leading-none text-[#424242] outline-none placeholder:text-[#424242]"
+                  placeholder="Search Chats"
+                  type="search"
                 />
-                <path
-                  d="M16 16L20 20"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeWidth="1.5"
-                />
-              </svg>
-              <input
-                aria-label="Search chats"
-                className="w-[120px] bg-transparent text-[14px] font-medium leading-none text-[#424242] outline-none placeholder:text-[#424242]"
-                placeholder="Search Chats"
-                type="search"
-              />
+              </div>
             </div>
-          </div>
           </header>
 
           <div className="mt-[15px] overflow-x-auto px-[14px]">
@@ -132,7 +160,7 @@ export function InboxList({ conversations }: InboxListProps) {
                     "flex size-[63px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[15px] font-semibold text-white shadow-[0_2px_10px_rgba(0,0,0,0.08)]",
                     getStoryBackground(conversation.avatarSeed)
                   )}
-                  key={`story-${conversation.conversationId}`}
+                  key={conversation.key}
                 >
                   {conversation.initials}
                 </div>
@@ -184,7 +212,7 @@ export function InboxList({ conversations }: InboxListProps) {
           <div className="relative h-5">
             <div className="absolute bottom-0 left-1/2 h-[5px] w-[134px] -translate-x-1/2 rounded-full bg-black" />
           </div>
-        </div>
+        </nav>
       </div>
     </main>
   );
