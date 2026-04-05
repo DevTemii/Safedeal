@@ -20,13 +20,74 @@ function getStoryBackground(seed: string) {
   return storyBackgrounds[total % storyBackgrounds.length];
 }
 
+function ChatIcon({ active = false }: { active?: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={cn("size-[21px]", active ? "text-[#012de3]" : "text-[#555555]")}
+      fill={active ? "currentColor" : "none"}
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M7 18.5C5.61929 18.5 4.5 17.3807 4.5 16V7C4.5 5.61929 5.61929 4.5 7 4.5H17C18.3807 4.5 19.5 5.61929 19.5 7V16C19.5 17.3807 18.3807 18.5 17 18.5H10.1538L7.04361 20.8327C6.71353 21.0803 6.25 20.8448 6.25 20.4322V18.5H7Z"
+        stroke={active ? "none" : "currentColor"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+function DealsIcon() {
+  return (
+    <svg aria-hidden="true" className="size-[21px] text-[#555555]" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M8 4.75H16M8 9.75H16M8 14.75H13M6.75 20.25H17.25C18.4926 20.25 19.5 19.2426 19.5 18V6C19.5 4.75736 18.4926 3.75 17.25 3.75H6.75C5.50736 3.75 4.5 4.75736 4.5 6V18C4.5 19.2426 5.50736 20.25 6.75 20.25Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg aria-hidden="true" className="size-[21px] text-[#555555]" fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="7.25" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12 8V12L14.75 14.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function ProfileIcon() {
+  return (
+    <svg aria-hidden="true" className="size-[21px] text-[#555555]" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M12 12C13.7949 12 15.25 10.5449 15.25 8.75C15.25 6.95507 13.7949 5.5 12 5.5C10.2051 5.5 8.75 6.95507 8.75 8.75C8.75 10.5449 10.2051 12 12 12Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M5.75 18.25C6.54774 15.9783 8.71126 14.5 12 14.5C15.2887 14.5 17.4523 15.9783 18.25 18.25"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
 export function InboxList({ conversations }: InboxListProps) {
   const storyItems = conversations.slice(0, 6);
 
   return (
     <main className="min-h-screen bg-white text-[#171616]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col bg-white pb-[calc(env(safe-area-inset-bottom)+12px)]">
-        <header className="px-[14px] pt-[calc(env(safe-area-inset-top)+28px)]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col bg-white">
+        <div className="flex-1 pb-[92px]">
+          <header className="px-[14px] pt-[calc(env(safe-area-inset-top)+28px)]">
           <h1 className="text-center text-[23px] font-bold leading-none tracking-[-0.02em] text-black">
             Chats
           </h1>
@@ -59,34 +120,68 @@ export function InboxList({ conversations }: InboxListProps) {
               type="search"
             />
           </div>
-        </header>
+          </header>
 
-        <div className="mt-[15px] overflow-x-auto px-[14px] scrollbar-none">
-          <div className="flex min-w-max gap-2">
-            {storyItems.map((conversation) => (
-              <div
-                className={cn(
-                  "flex size-[63px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[15px] font-semibold text-white",
-                  getStoryBackground(conversation.avatarSeed)
-                )}
-                key={`story-${conversation.conversationId}`}
-              >
-                {conversation.initials}
-              </div>
+          <div className="mt-[15px] overflow-x-auto px-[14px]">
+            <div className="flex min-w-max gap-2">
+              {storyItems.map((conversation) => (
+                <div
+                  className={cn(
+                    "flex size-[63px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[15px] font-semibold text-white",
+                    getStoryBackground(conversation.avatarSeed)
+                  )}
+                  key={`story-${conversation.conversationId}`}
+                >
+                  {conversation.initials}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-[16px] mt-[14px] h-px bg-[#e3e3e3]" />
+
+          <div className="px-[14px] pt-[17px]">
+            {conversations.map((conversation, index) => (
+              <InboxListItem
+                conversation={conversation}
+                isLast={index === conversations.length - 1}
+                key={conversation.conversationId}
+              />
             ))}
           </div>
         </div>
 
-        <div className="mx-[16px] mt-[14px] h-px bg-[#e3e3e3]" />
+        <nav className="sticky bottom-0 border-t border-[#e3e3e3] bg-[#f3f3f3] pb-[calc(env(safe-area-inset-bottom)+15px)]">
+          <div className="flex h-[46px] items-center justify-between">
+            <div className="flex w-[78px] flex-col items-center gap-px px-[26px] py-2">
+              <ChatIcon active />
+              <span className="text-center text-[8px] font-bold tracking-[0.08px] text-[#012de3]">
+                Chats
+              </span>
+            </div>
+            <div className="flex w-[78px] flex-col items-center gap-px px-[26px] py-2">
+              <DealsIcon />
+              <span className="text-center text-[8px] font-bold tracking-[0.08px] text-[#555555]">
+                Deals
+              </span>
+            </div>
+            <div className="flex w-[78px] flex-col items-center gap-px px-[26px] py-2">
+              <HistoryIcon />
+              <span className="text-center text-[8px] font-bold tracking-[0.08px] text-[#555555]">
+                History
+              </span>
+            </div>
+            <div className="flex w-[78px] flex-col items-center gap-px px-[26px] py-2">
+              <ProfileIcon />
+              <span className="text-center text-[8px] font-bold tracking-[0.08px] text-[#555555]">
+                Profile
+              </span>
+            </div>
+          </div>
 
-        <div className="flex-1 px-[14px] pt-[17px]">
-          {conversations.map((conversation, index) => (
-            <InboxListItem
-              conversation={conversation}
-              isLast={index === conversations.length - 1}
-              key={conversation.conversationId}
-            />
-          ))}
+          <div className="relative h-5">
+            <div className="absolute bottom-0 left-1/2 h-[5px] w-[134px] -translate-x-1/2 rounded-full bg-black" />
+          </div>
         </div>
       </div>
     </main>
