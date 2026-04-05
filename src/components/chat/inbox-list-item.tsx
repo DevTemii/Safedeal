@@ -4,14 +4,16 @@ import type { InboxConversationItemData } from "@/lib/chat/types";
 
 interface InboxListItemProps {
   conversation: InboxConversationItemData;
+  isLast?: boolean;
 }
 
 const avatarBackgrounds = [
-  "from-[#FFE4DA] to-[#FFC6AE]",
-  "from-[#DCE8FF] to-[#B8CFFF]",
-  "from-[#E6F7EE] to-[#C2E7D1]",
-  "from-[#FFF0C2] to-[#FFD788]",
-  "from-[#F4E3FF] to-[#D7B8FF]",
+  "from-[#f4d0c3] via-[#dda278] to-[#c86c31]",
+  "from-[#ffb26f] via-[#ef6030] to-[#cf2f1e]",
+  "from-[#d6e7ef] via-[#7aa8cb] to-[#355f8f]",
+  "from-[#f3d6af] via-[#d29d52] to-[#8a5a20]",
+  "from-[#ddd7f2] via-[#9ca5d6] to-[#5c64a4]",
+  "from-[#efe2d3] via-[#caa98f] to-[#7e6455]",
 ];
 
 function getAvatarBackground(seed: string) {
@@ -31,54 +33,60 @@ function formatTimeLabel(value: string | null) {
   }
 
   return new Intl.DateTimeFormat("en-US", {
+    hour12: false,
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
 }
 
-export function InboxListItem({ conversation }: InboxListItemProps) {
+export function InboxListItem({
+  conversation,
+  isLast = false,
+}: InboxListItemProps) {
   const timeLabel = formatTimeLabel(conversation.lastMessageAt);
 
   return (
-    <Link
-      className="flex items-start gap-3 border-b border-[#ececec] px-4 py-4 transition-colors hover:bg-[#fafafa]"
-      href={conversation.href}
-    >
-      <div
-        className={cn(
-          "flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold text-[#171616]",
-          getAvatarBackground(conversation.avatarSeed)
-        )}
+    <div>
+      <Link
+        className="block rounded-[18px] transition-colors hover:bg-[#fafafa]"
+        href={conversation.href}
       >
-        {conversation.initials}
-      </div>
+        <div className="grid grid-cols-[52px_minmax(0,1fr)_auto] items-start gap-x-[11px]">
+          <div
+            className={cn(
+              "flex size-[52px] items-center justify-center rounded-full bg-gradient-to-br text-[14px] font-semibold text-white",
+              getAvatarBackground(conversation.avatarSeed)
+            )}
+          >
+            {conversation.initials}
+          </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="truncate text-[17px] font-bold leading-5 text-[#171616]">
+          <div className="min-w-0 pt-[2px]">
+            <p className="truncate text-[15px] font-bold leading-[1.15] text-[#171616]">
               {conversation.displayName}
             </p>
-            <p className="mt-1 truncate text-[13px] leading-5 text-[#878787]">
+            <p className="mt-[7px] truncate text-[12px] font-medium leading-[1.2] text-[#878787]">
               {conversation.lastMessagePreview}
             </p>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-2 pt-0.5">
+          <div className="flex min-h-[52px] shrink-0 flex-col items-end justify-start pt-[1px]">
             {timeLabel ? (
-              <span className="text-[12px] leading-none text-[#878787]">
+              <span className="text-[12px] font-medium leading-none text-[#878787]">
                 {timeLabel}
               </span>
             ) : null}
 
             {conversation.unreadCount > 0 ? (
-              <span className="min-w-[24px] rounded-full bg-[#4038d9] px-2 py-1 text-center text-[10px] font-semibold leading-none text-white">
+              <span className="mt-[14px] flex h-4 min-w-6 items-center justify-center rounded-[10px] bg-[#4038d9] px-[6px] text-center text-[10px] font-medium leading-none text-white">
                 {conversation.unreadCount}
               </span>
             ) : null}
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {!isLast ? <div className="ml-[57px] mt-[7px] h-px bg-[#e3e3e3]" /> : null}
+    </div>
   );
 }

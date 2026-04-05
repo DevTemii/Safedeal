@@ -27,6 +27,79 @@ interface MessageRow {
   sender_id: string | null;
 }
 
+const fallbackConversations: InboxConversationItemData[] = [
+  {
+    avatarSeed: "blessing-cakes",
+    conversationId: "fallback-1",
+    displayName: "Blessing Cakes",
+    href: "/inbox",
+    initials: "BC",
+    lastMessageAt: "2026-04-05T11:34:00.000Z",
+    lastMessagePreview: "Delivery will be tomorrow morning",
+    unreadCount: 1,
+  },
+  {
+    avatarSeed: "tobi-dev",
+    conversationId: "fallback-2",
+    displayName: "Tobi (Dev)",
+    href: "/inbox",
+    initials: "TD",
+    lastMessageAt: "2026-04-05T20:12:00.000Z",
+    lastMessagePreview: "So $300 for the landing page, right?",
+    unreadCount: 2,
+  },
+  {
+    avatarSeed: "tunde-logistics",
+    conversationId: "fallback-3",
+    displayName: "Tunde Logistics",
+    href: "/inbox",
+    initials: "TL",
+    lastMessageAt: "2026-04-05T12:13:00.000Z",
+    lastMessagePreview: "Package has been dispatched",
+    unreadCount: 2,
+  },
+  {
+    avatarSeed: "kemi-ui",
+    conversationId: "fallback-4",
+    displayName: "Kemi UI",
+    href: "/inbox",
+    initials: "KU",
+    lastMessageAt: "2026-04-05T15:33:00.000Z",
+    lastMessagePreview: "Payment is secured, I’m working on it...",
+    unreadCount: 3,
+  },
+  {
+    avatarSeed: "ada-designs",
+    conversationId: "fallback-5",
+    displayName: "Ada Designs",
+    href: "/inbox",
+    initials: "AD",
+    lastMessageAt: "2026-04-05T05:09:00.000Z",
+    lastMessagePreview: "I’ve created the deal, please confirm",
+    unreadCount: 1,
+  },
+  {
+    avatarSeed: "fauna-blockchain-dev",
+    conversationId: "fallback-6",
+    displayName: "Fauna (Blockchain dev)",
+    href: "/inbox",
+    initials: "FB",
+    lastMessageAt: "2026-04-05T22:22:00.000Z",
+    lastMessagePreview: "So $300 for the landing page, right?",
+    unreadCount: 2,
+  },
+  {
+    avatarSeed: "zainab-store",
+    conversationId: "fallback-7",
+    displayName: "Zainab Store",
+    href: "/inbox",
+    initials: "ZS",
+    lastMessageAt: "2026-04-05T16:54:00.000Z",
+    lastMessagePreview: "Thanks, payment received!",
+    unreadCount: 0,
+  },
+];
+
 function shortenWallet(value: string | null | undefined) {
   if (!value) {
     return "Unknown user";
@@ -178,20 +251,5 @@ export default async function InboxPage() {
     });
   }
 
-  return (
-    <main className="min-h-screen bg-white">
-      <div className="mx-auto flex min-h-screen max-w-md flex-col">
-        <header className="px-4 pb-5 pt-[calc(env(safe-area-inset-top)+1rem)]">
-          <h1 className="text-center text-[33px] font-bold tracking-[-0.03em] text-[#171616]">
-            Chats
-          </h1>
-          <p className="mt-2 text-center text-[13px] leading-5 text-[#878787]">
-            {shortenWallet(profile.wallet_address)}
-          </p>
-        </header>
-
-        <InboxList conversations={items} />
-      </div>
-    </main>
-  );
+  return <InboxList conversations={items.length ? items : fallbackConversations} />;
 }
