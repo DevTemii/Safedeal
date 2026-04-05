@@ -1,24 +1,10 @@
+import { InboxAvatar } from "@/components/chat/inbox-avatar";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import type { InboxConversationItemData } from "@/lib/chat/types";
 
 interface InboxListItemProps {
   conversation: InboxConversationItemData;
   isLast?: boolean;
-}
-
-const avatarBackgrounds = [
-  "from-[#f2d0c3] via-[#e2a272] to-[#cf7033]",
-  "from-[#ffb16a] via-[#ef6331] to-[#cc371f]",
-  "from-[#dbe7ef] via-[#7da7c8] to-[#426485]",
-  "from-[#f2d6b2] via-[#d39d54] to-[#895b21]",
-  "from-[#ded8f1] via-[#a0a7d9] to-[#6568a7]",
-  "from-[#eee1d2] via-[#c9a88f] to-[#826858]",
-];
-
-function getAvatarBackground(seed: string) {
-  const total = seed.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return avatarBackgrounds[total % avatarBackgrounds.length];
 }
 
 function formatTimeLabel(value: string | null) {
@@ -52,14 +38,11 @@ export function InboxListItem({
         href={conversation.href}
       >
         <div className="grid min-h-[52px] grid-cols-[52px_minmax(0,1fr)_40px] items-start gap-x-[11px]">
-          <div
-            className={cn(
-              "flex size-[52px] items-center justify-center rounded-full bg-gradient-to-br text-[14px] font-semibold text-white",
-              getAvatarBackground(conversation.avatarSeed)
-            )}
-          >
-            {conversation.initials}
-          </div>
+          <InboxAvatar
+            initials={conversation.initials}
+            seed={conversation.avatarSeed}
+            sizeClassName="size-[52px]"
+          />
 
           <div className="min-w-0 pt-[6px]">
             <p className="truncate text-[15px] font-bold leading-none text-[#171616]">
