@@ -87,47 +87,49 @@ export function InboxList({ conversations }: InboxListProps) {
     <main className="min-h-screen bg-white text-[#171616]">
       <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col bg-white">
         <div className="flex-1 pb-[92px]">
-          <header className="px-[14px] pt-[calc(env(safe-area-inset-top)+28px)]">
+          <header className="px-[14px] pt-[calc(env(safe-area-inset-top)+50px)]">
           <h1 className="text-center text-[23px] font-bold leading-none tracking-[-0.02em] text-black">
             Chats
           </h1>
 
-          <div className="relative mt-[27px]">
-            <svg
-              aria-hidden="true"
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#424242]"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="6.25"
-                stroke="currentColor"
-                strokeWidth="1.5"
+          <div className="mt-[18px] flex h-[41px] items-center justify-center rounded-[22px] border border-[#b7b7b7] bg-white">
+            <div className="flex items-center gap-1 text-[#424242]">
+              <svg
+                aria-hidden="true"
+                className="size-4 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="6.25"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M16 16L20 20"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="1.5"
+                />
+              </svg>
+              <input
+                aria-label="Search chats"
+                className="w-[120px] bg-transparent text-[14px] font-medium leading-none text-[#424242] outline-none placeholder:text-[#424242]"
+                placeholder="Search Chats"
+                type="search"
               />
-              <path
-                d="M16 16L20 20"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="1.5"
-              />
-            </svg>
-            <input
-              aria-label="Search chats"
-              className="h-[41px] w-full rounded-[22px] border border-[#b7b7b7] bg-white pl-10 pr-4 text-[14px] font-medium text-[#171616] outline-none placeholder:text-[#424242]"
-              placeholder="Search Chats"
-              type="search"
-            />
+            </div>
           </div>
           </header>
 
           <div className="mt-[15px] overflow-x-auto px-[14px]">
-            <div className="flex min-w-max gap-2">
+            <div className="flex min-w-max items-center gap-2">
               {storyItems.map((conversation) => (
                 <div
                   className={cn(
-                    "flex size-[63px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[15px] font-semibold text-white",
+                    "flex size-[63px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[15px] font-semibold text-white shadow-[0_2px_10px_rgba(0,0,0,0.08)]",
                     getStoryBackground(conversation.avatarSeed)
                   )}
                   key={`story-${conversation.conversationId}`}
