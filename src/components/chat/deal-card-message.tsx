@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PreparedActionButton } from "@/components/payment/prepared-action-button";
+import { RaiseIssueButton } from "@/components/payment/raise-issue-button";
 import type { MessageMetadata } from "@/lib/chat/types";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +62,8 @@ export function DealCardMessage({
     (status === "draft" || status === "approved" || status === "funding_pending");
   const canMarkDelivered =
     dealId && sellerId === currentUserId && status === "funded";
+  const canConfirmDelivery =
+    dealId && buyerId === currentUserId && status === "delivered";
 
   return (
     <div className="w-full max-w-[283px] rounded-tl-[13px] rounded-tr-[13px] rounded-bl-[13px] border border-[#E6E6E6] bg-[#F8F8F8] px-3 py-[10px] shadow-[0px_2px_18px_rgba(0,0,0,0.06)]">
@@ -113,6 +116,20 @@ export function DealCardMessage({
             successLabel="Delivery confirmed onchain."
             walletLabel="Open MiniPay..."
           />
+        </div>
+      ) : null}
+
+      {canConfirmDelivery ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <PreparedActionButton
+            buttonLabel="Confirm Delivery"
+            confirmLabel="Confirming Release..."
+            confirmUrl={`/api/deals/${dealId}/release/confirm`}
+            prepareUrl={`/api/deals/${dealId}/release/prepare`}
+            successLabel="Payment released onchain."
+            walletLabel="Open MiniPay..."
+          />
+          <RaiseIssueButton dealId={dealId} />
         </div>
       ) : null}
     </div>
