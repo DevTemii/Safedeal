@@ -137,8 +137,195 @@ contract SafeDealEscrowTest is Test {
         assertEq(sellerDisputedAt, uint64(block.timestamp));
     }
 
+    function testCreateDealRevertsOnInvalidParams() public {
+        vm.startPrank(buyer);
+
+        vm.expectRevert(SafeDealEscrow.InvalidSeller.selector);
+        escrow.createDeal(address(0), address(token), DEAL_AMOUNT, DEAL_DEADLINE);
+
+        vm.expectRevert(SafeDealEscrow.InvalidToken.selector);
+        escrow.createDeal(seller, address(0), DEAL_AMOUNT, DEAL_DEADLINE);
+
+        vm.expectRevert(SafeDealEscrow.InvalidAmount.selector);
+        escrow.createDeal(seller, address(token), 0, DEAL_DEADLINE);
+
+        vm.expectRevert(SafeDealEscrow.SelfDeal.selector);
+        escrow.createDeal(buyer, address(token), DEAL_AMOUNT, DEAL_DEADLINE);
+
+        vm.stopPrank();
+    }
+
+    function testOnlyBuyerCanFund() public {
+        uint256 dealId = _createDeal();
+
+        vm.prank(outsider);
+        vm.expectRevert(SafeDealEscrow.OnlyBuyer.selector);
+        escrow.fundDeal(dealId);
+    }
+
+    function testCannotFundTwice() public {
+        uint256 dealId = _createFundedDeal();
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Created,
+                SafeDealEscrow.DealStatus.Funded
+            )
+        );
+        escrow.fundDeal(dealId);
+    }
+
+    function testOnlySellerCanMarkDelivered() public {
+        uint256 dealId = _createFundedDeal();
+
+        vm.prank(buyer);
+        vm.expectRevert(SafeDealEscrow.OnlySeller.selector);
+        escrow.markDelivered(dealId);
+    }
+
+    function testCannotMarkDeliveredBeforeFunding() public {
+        uint256 dealId = _createDeal();
+
+        vm.prank(seller);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Funded,
+                SafeDealEscrow.DealStatus.Created
+            )
+        );
+        escrow.markDelivered(dealId);
+    }
+
+    function testOnlyBuyerCanRelease() public {
+        uint256 dealId = _createDeliveredDeal();
+
+        vm.prank(seller);
+        vm.expectRevert(SafeDealEscrow.OnlyBuyer.selector);
+        escrow.releaseDeal(dealId);
+    }
+
+    function testCannotReleaseBeforeFunded() public {
+        uint256 dealId = _createDeal();
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Delivered,
+                SafeDealEscrow.DealStatus.Created
+            )
+        );
+        escrow.releaseDeal(dealId);
+    }
+
+    function testCannotReleaseBeforeDelivered() public {
+        uint256 dealId = _createFundedDeal();
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Delivered,
+                SafeDealEscrow.DealStatus.Funded
+            )
+        );
+        escrow.releaseDeal(dealId);
+    }
+
+    function testOutsiderCannotRaiseDispute() public {
+        uint256 dealId = _createFundedDeal();
+
+        vm.prank(outsider);
+        vm.expectRevert(SafeDealEscrow.OnlyParticipant.selector);
+        escrow.raiseDispute(dealId);
+    }
+
+    function testDisputeBlocksRelease() public {
+        uint256 dealId = _createDeliveredDeal();
+
+        vm.prank(seller);
+        escrow.raiseDispute(dealId);
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Delivered,
+                SafeDealEscrow.DealStatus.Disputed
+            )
+        );
+        escrow.releaseDeal(dealId);
+    }
+
+    function testCompletedDealRejectsFurtherActions() public {
+        uint256 dealId = _createCompletedDeal();
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Created,
+                SafeDealEscrow.DealStatus.Completed
+            )
+        );
+        escrow.fundDeal(dealId);
+
+        vm.prank(seller);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Funded,
+                SafeDealEscrow.DealStatus.Completed
+            )
+        );
+        escrow.markDelivered(dealId);
+
+        vm.prank(buyer);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.InvalidState.selector,
+                SafeDealEscrow.DealStatus.Delivered,
+                SafeDealEscrow.DealStatus.Completed
+            )
+        );
+        escrow.releaseDeal(dealId);
+
+        vm.prank(seller);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SafeDealEscrow.DisputeNotAllowed.selector,
+                SafeDealEscrow.DealStatus.Completed
+            )
+        );
+        escrow.raiseDispute(dealId);
+    }
+
     function _createDeal() internal returns (uint256 dealId) {
         vm.prank(buyer);
         dealId = escrow.createDeal(seller, address(token), DEAL_AMOUNT, DEAL_DEADLINE);
+    }
+
+    function _createFundedDeal() internal returns (uint256 dealId) {
+        dealId = _createDeal();
+
+        vm.prank(buyer);
+        escrow.fundDeal(dealId);
+    }
+
+    function _createDeliveredDeal() internal returns (uint256 dealId) {
+        dealId = _createFundedDeal();
+
+        vm.prank(seller);
+        escrow.markDelivered(dealId);
+    }
+
+    function _createCompletedDeal() internal returns (uint256 dealId) {
+        dealId = _createDeliveredDeal();
+
+        vm.prank(buyer);
+        escrow.releaseDeal(dealId);
     }
 }
