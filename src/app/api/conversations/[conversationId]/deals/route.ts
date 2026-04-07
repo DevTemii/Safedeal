@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildDealCardMetadata } from "@/lib/chat/deal-messages";
 import {
+  ApiError,
   jsonError,
   parseNonEmptyText,
   parseOptionalText,
@@ -44,6 +45,9 @@ export async function POST(request: Request, context: RouteContext) {
       .single();
 
     throwIfDatabaseError(error, "Unable to create the deal.");
+    if (!deal) {
+      throw new ApiError(500, "Unable to create the deal.");
+    }
 
     const { error: messageInsertError } = await supabase.from("messages").insert([
       {
