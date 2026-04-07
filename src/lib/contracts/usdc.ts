@@ -1,10 +1,13 @@
 import {
+  createPublicClient,
   encodeFunctionData,
   getAddress,
+  http,
   isAddress,
   type Address,
   type Hex,
 } from "viem";
+import { getSafeDealChain, getSafeDealRpcUrl } from "@/lib/contracts/network";
 
 export const erc20Abi = [
   {
@@ -80,5 +83,25 @@ export function encodeApproveUsdcTransaction({
     abi: erc20Abi,
     args: [spender, amount],
     functionName: "approve",
+  });
+}
+
+export async function getUsdcAllowance({
+  owner,
+  spender,
+}: {
+  owner: Address;
+  spender: Address;
+}) {
+  const publicClient = createPublicClient({
+    chain: getSafeDealChain(),
+    transport: http(getSafeDealRpcUrl()),
+  });
+
+  return publicClient.readContract({
+    abi: erc20Abi,
+    address: getUsdcAddress(),
+    args: [owner, spender],
+    functionName: "allowance",
   });
 }

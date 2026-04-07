@@ -11,6 +11,7 @@ export interface DealActionRecord {
   buyer_id: string;
   contract_deal_id: number | string | null;
   conversation_id: string;
+  deadline_at: string;
   delivery_status: string;
   description: string | null;
   dispute_status: string;
@@ -53,7 +54,7 @@ export async function loadDealActionContext(
   const { data: deal, error: dealError } = await supabase
     .from("deals")
     .select(
-      "id, conversation_id, buyer_id, seller_id, title, description, amount_minor, settlement_token, status, escrow_status, delivery_status, dispute_status, contract_deal_id, tx_create_hash, tx_fund_hash, tx_deliver_hash, tx_release_hash"
+      "id, conversation_id, buyer_id, seller_id, title, description, amount_minor, settlement_token, status, escrow_status, delivery_status, dispute_status, deadline_at, contract_deal_id, tx_create_hash, tx_fund_hash, tx_deliver_hash, tx_release_hash"
     )
     .eq("id", dealId)
     .maybeSingle();
