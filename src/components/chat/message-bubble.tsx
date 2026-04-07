@@ -62,7 +62,7 @@ function EventCard({
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm text-white"
             style={{ backgroundColor: accent }}
           >
-            •
+            &bull;
           </span>
           <p className="text-[12px] font-semibold leading-[18px] text-[#0F0F0F]">
             {title}

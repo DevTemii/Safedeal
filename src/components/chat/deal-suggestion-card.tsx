@@ -31,7 +31,7 @@ function getSummaryLine(body: string, metadata: MessageMetadata) {
   );
 
   if (parts.length) {
-    return parts.join(" • ");
+    return parts.join(" \u2022 ");
   }
 
   return body;
