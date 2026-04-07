@@ -30,14 +30,15 @@ contract SafeDealEscrow {
     }
 
     error DealNotFound(uint256 dealId);
+    error DisputeNotAllowed(DealStatus status);
     error InvalidAmount();
     error InvalidSeller();
     error InvalidState(DealStatus expected, DealStatus actual);
     error InvalidToken();
     error OnlyBuyer();
+    error OnlyParticipant();
     error OnlySeller();
     error SelfDeal();
-    error NotImplemented();
 
     uint256 public nextDealId;
     mapping(uint256 dealId => Deal deal) public deals;
@@ -125,8 +126,17 @@ contract SafeDealEscrow {
     }
 
     function raiseDispute(uint256 dealId) external {
-        dealId;
-        revert NotImplemented();
+        Deal storage deal = _getDeal(dealId);
+
+        if (msg.sender != deal.buyer && msg.sender != deal.seller) revert OnlyParticipant();
+        if (deal.status == DealStatus.Completed || deal.status == DealStatus.Disputed) {
+            revert DisputeNotAllowed(deal.status);
+        }
+
+        deal.status = DealStatus.Disputed;
+        deal.disputedAt = uint64(block.timestamp);
+
+        emit DealDisputed(dealId, msg.sender);
     }
 
     function _getDeal(uint256 dealId) internal view returns (Deal storage deal) {
