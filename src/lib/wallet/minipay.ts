@@ -5,7 +5,7 @@ import {
   isAddress,
   type Address,
 } from "viem";
-import { celo } from "viem/chains";
+import { getSafeDealChain } from "@/lib/contracts/network";
 
 export interface MiniPayProvider {
   isMiniPay?: boolean;
@@ -49,7 +49,7 @@ export function createMiniPayWalletClient() {
   }
 
   return createWalletClient({
-    chain: celo,
+    chain: getSafeDealChain(),
     transport: custom(provider),
   });
 }
