@@ -35,6 +35,7 @@ contract SafeDealEscrow {
     error InvalidState(DealStatus expected, DealStatus actual);
     error InvalidToken();
     error OnlyBuyer();
+    error OnlySeller();
     error SelfDeal();
     error NotImplemented();
 
@@ -98,13 +99,29 @@ contract SafeDealEscrow {
     }
 
     function markDelivered(uint256 dealId) external {
-        dealId;
-        revert NotImplemented();
+        Deal storage deal = _getDeal(dealId);
+
+        if (msg.sender != deal.seller) revert OnlySeller();
+        if (deal.status != DealStatus.Funded) revert InvalidState(DealStatus.Funded, deal.status);
+
+        deal.status = DealStatus.Delivered;
+        deal.deliveredAt = uint64(block.timestamp);
+
+        emit DealDelivered(dealId, msg.sender);
     }
 
     function releaseDeal(uint256 dealId) external {
-        dealId;
-        revert NotImplemented();
+        Deal storage deal = _getDeal(dealId);
+
+        if (msg.sender != deal.buyer) revert OnlyBuyer();
+        if (deal.status != DealStatus.Delivered) revert InvalidState(DealStatus.Delivered, deal.status);
+
+        deal.status = DealStatus.Completed;
+        deal.releasedAt = uint64(block.timestamp);
+
+        IERC20(deal.token).safeTransfer(deal.seller, deal.amount);
+
+        emit DealReleased(dealId, msg.sender, deal.seller, deal.amount);
     }
 
     function raiseDispute(uint256 dealId) external {
