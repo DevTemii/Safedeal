@@ -29,6 +29,13 @@ contract SafeDealEscrow {
         uint64 releasedAt;
     }
 
+    error DealNotFound(uint256 dealId);
+    error InvalidAmount();
+    error InvalidSeller();
+    error InvalidState(DealStatus expected, DealStatus actual);
+    error InvalidToken();
+    error OnlyBuyer();
+    error SelfDeal();
     error NotImplemented();
 
     uint256 public nextDealId;
@@ -52,17 +59,42 @@ contract SafeDealEscrow {
     event DealDisputed(uint256 indexed dealId, address indexed raisedBy);
 
     function createDeal(address seller, address token, uint256 amount, uint64 deadline) external returns (uint256 dealId) {
-        seller;
-        token;
-        amount;
-        deadline;
-        dealId = 0;
-        revert NotImplemented();
+        if (seller == address(0)) revert InvalidSeller();
+        if (token == address(0)) revert InvalidToken();
+        if (amount == 0) revert InvalidAmount();
+        if (seller == msg.sender) revert SelfDeal();
+
+        dealId = nextDealId++;
+
+        deals[dealId] = Deal({
+            buyer: msg.sender,
+            seller: seller,
+            token: token,
+            amount: amount,
+            deadline: deadline,
+            status: DealStatus.Created,
+            createdAt: uint64(block.timestamp),
+            fundedAt: 0,
+            deliveredAt: 0,
+            disputedAt: 0,
+            releasedAt: 0
+        });
+
+        emit DealCreated(dealId, msg.sender, seller, token, amount, deadline);
     }
 
     function fundDeal(uint256 dealId) external {
-        dealId;
-        revert NotImplemented();
+        Deal storage deal = _getDeal(dealId);
+
+        if (msg.sender != deal.buyer) revert OnlyBuyer();
+        if (deal.status != DealStatus.Created) revert InvalidState(DealStatus.Created, deal.status);
+
+        deal.status = DealStatus.Funded;
+        deal.fundedAt = uint64(block.timestamp);
+
+        IERC20(deal.token).safeTransferFrom(msg.sender, address(this), deal.amount);
+
+        emit DealFunded(dealId, msg.sender, deal.amount);
     }
 
     function markDelivered(uint256 dealId) external {
@@ -78,5 +110,11 @@ contract SafeDealEscrow {
     function raiseDispute(uint256 dealId) external {
         dealId;
         revert NotImplemented();
+    }
+
+    function _getDeal(uint256 dealId) internal view returns (Deal storage deal) {
+        deal = deals[dealId];
+
+        if (deal.buyer == address(0)) revert DealNotFound(dealId);
     }
 }
