@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PreparedActionButton } from "@/components/payment/prepared-action-button";
 import type { MessageMetadata } from "@/lib/chat/types";
 import { cn } from "@/lib/utils";
 
@@ -50,12 +51,16 @@ export function DealCardMessage({
   const status = readText(metadata, "status");
   const title = readText(metadata, "title") ?? "Deal summary";
   const summary = readText(metadata, "summary");
+  const dealId = readText(metadata, "dealId");
   const securePaymentHref = readText(metadata, "securePaymentHref");
   const buyerId = readText(metadata, "buyerId");
+  const sellerId = readText(metadata, "sellerId");
   const canSecurePayment =
     securePaymentHref &&
     buyerId === currentUserId &&
     (status === "draft" || status === "approved" || status === "funding_pending");
+  const canMarkDelivered =
+    dealId && sellerId === currentUserId && status === "funded";
 
   return (
     <div className="w-full max-w-[283px] rounded-tl-[13px] rounded-tr-[13px] rounded-bl-[13px] border border-[#E6E6E6] bg-[#F8F8F8] px-3 py-[10px] shadow-[0px_2px_18px_rgba(0,0,0,0.06)]">
@@ -95,6 +100,19 @@ export function DealCardMessage({
           >
             Secure Payment
           </Link>
+        </div>
+      ) : null}
+
+      {canMarkDelivered ? (
+        <div className="mt-3">
+          <PreparedActionButton
+            buttonLabel="Mark Delivered"
+            confirmLabel="Confirming Delivery..."
+            confirmUrl={`/api/deals/${dealId}/deliver/confirm`}
+            prepareUrl={`/api/deals/${dealId}/deliver/prepare`}
+            successLabel="Delivery confirmed onchain."
+            walletLabel="Open MiniPay..."
+          />
         </div>
       ) : null}
     </div>

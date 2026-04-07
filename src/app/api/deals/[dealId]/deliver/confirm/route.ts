@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAddress } from "viem";
 import {
+  buildDealCardMetadata,
+  buildDeliveryEventMetadata,
+} from "@/lib/chat/deal-messages";
+import {
   getDealDeliveredLog,
   parseTransactionHash,
   waitForConfirmedEscrowTransaction,
@@ -95,6 +99,42 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (updatedDealError || !updatedDeal) {
       throw updatedDealError ?? new ApiError(409, "Deal delivery has already been confirmed.");
+    }
+
+    const { error: messageInsertError } = await actionContext.supabase
+      .from("messages")
+      .insert([
+        {
+          body: "Delivery marked",
+          conversation_id: actionContext.deal.conversation_id,
+          metadata: buildDeliveryEventMetadata({
+            description:
+              "The seller marked this deal as delivered. The buyer can now confirm delivery or raise an issue.",
+            status: "delivered",
+          }),
+          sender_id: actionContext.profile.id,
+        },
+        {
+          body: "Deal updated",
+          conversation_id: actionContext.deal.conversation_id,
+          metadata: buildDealCardMetadata({
+            amountMinor: actionContext.deal.amount_minor,
+            buyerId: actionContext.deal.buyer_id,
+            dealId: actionContext.deal.id,
+            deliveryLabel: actionContext.deal.description,
+            sellerId: actionContext.deal.seller_id,
+            status: "delivered",
+            title: actionContext.deal.title,
+          }),
+          sender_id: actionContext.profile.id,
+        },
+      ]);
+
+    if (messageInsertError) {
+      console.error(
+        "[deliver.confirm] unable to append chat messages:",
+        messageInsertError
+      );
     }
 
     return NextResponse.json({
