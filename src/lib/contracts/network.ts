@@ -10,7 +10,8 @@ function getConfiguredChainId() {
     process.env.NEXT_PUBLIC_NETWORK_ID ?? process.env.NETWORK_ID ?? null;
 
   if (!rawValue) {
-    return DEFAULT_CELO_CHAIN_ID;
+    // Stay on Sepolia by default until SafeDeal explicitly moves to mainnet.
+    return DEFAULT_CELO_SEPOLIA_CHAIN_ID;
   }
 
   const parsedValue = Number(rawValue);

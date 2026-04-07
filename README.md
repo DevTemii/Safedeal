@@ -30,7 +30,10 @@ Required in `.env.local`:
 - `NEXT_PUBLIC_NETWORK_ID` - Chain ID (44787 for Celo Sepolia)
 - `NEXT_PUBLIC_RPC_URL` - RPC endpoint
 - `NEXT_PUBLIC_USDC_ADDRESS` - USDC token address
+- `NEXT_PUBLIC_ESCROW_ADDRESS` - SafeDeal escrow contract address on the active chain
 - `NEXT_PUBLIC_APP_URL` - App root URL
+
+SafeDeal stays on Celo Sepolia by default until mainnet launch is explicitly configured.
 
 ## Testing with MiniPay
 
@@ -104,3 +107,4 @@ src/
 - Chain: Celo Sepolia (ID: 44787)
 - Token: USDC (Testnet)
 - RPC: https://sepolia-forno.celo-testnet.org
+- Escrow: set `NEXT_PUBLIC_ESCROW_ADDRESS` after Sepolia deployment
