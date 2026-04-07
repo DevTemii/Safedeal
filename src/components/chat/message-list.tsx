@@ -1,6 +1,9 @@
-import type { ChatMessageViewModel } from "@/lib/chat/types";
+"use client";
+
+import { Fragment, useState } from "react";
+import { DayDivider } from "@/components/chat/day-divider";
 import { MessageBubble } from "@/components/chat/message-bubble";
-import { SystemMessage } from "@/components/chat/system-message";
+import type { ChatMessageViewModel } from "@/lib/chat/types";
 
 interface MessageListProps {
   currentUserId: string;
@@ -9,9 +12,20 @@ interface MessageListProps {
 
 function formatDayLabel(value: string) {
   const date = new Date(value);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
 
   if (Number.isNaN(date.getTime())) {
     return null;
+  }
+
+  if (date.toDateString() === now.toDateString()) {
+    return "Today";
+  }
+
+  if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -21,37 +35,63 @@ function formatDayLabel(value: string) {
 }
 
 export function MessageList({ currentUserId, messages }: MessageListProps) {
+  const [dismissedSuggestionIds, setDismissedSuggestionIds] = useState<string[]>(
+    []
+  );
+
+  const visibleMessages = messages.filter(
+    (message) =>
+      !(
+        message.type === "deal_suggestion" &&
+        dismissedSuggestionIds.includes(message.id)
+      )
+  );
+
   if (!messages.length) {
-    return (
-      <div className="flex flex-1 items-center justify-center px-6">
-        <div className="max-w-xs text-center">
-          <h2 className="text-[18px] font-semibold text-[#171616]">
-            No messages yet
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-[#878787]">
-            This conversation is ready for its first message. SafeDeal actions
-            will appear here as the deal progresses.
-          </p>
-        </div>
-      </div>
-    );
+    return <div className="flex-1 overflow-y-auto bg-white px-[13px] pb-6 pt-[14px]" />;
   }
 
   let previousDayKey: string | null = null;
+  let previousMessage: ChatMessageViewModel | null = null;
 
   return (
-    <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-0 py-5">
-      {messages.map((message) => {
+    <div className="flex-1 overflow-y-auto bg-white px-[13px] pb-6 pt-[14px]">
+      {visibleMessages.map((message, index) => {
         const dayLabel = formatDayLabel(message.createdAt);
         const dayKey = dayLabel ?? null;
         const showDayLabel = Boolean(dayKey && dayKey !== previousDayKey);
+        const isTightCluster =
+          previousMessage?.type === "text" &&
+          message.type === "text" &&
+          previousMessage.senderId === message.senderId;
+        const topSpacingClass = showDayLabel
+          ? "mt-[14px]"
+          : index === 0
+            ? ""
+            : isTightCluster
+              ? "mt-px"
+              : "mt-[10px]";
+
         previousDayKey = dayKey;
+        previousMessage = message;
 
         return (
-          <div className="space-y-3" key={message.id}>
-            {showDayLabel ? <SystemMessage>{dayLabel!}</SystemMessage> : null}
-            <MessageBubble currentUserId={currentUserId} message={message} />
-          </div>
+          <Fragment key={message.id}>
+            {showDayLabel ? <DayDivider>{dayLabel!}</DayDivider> : null}
+            <div className={topSpacingClass}>
+              <MessageBubble
+                currentUserId={currentUserId}
+                message={message}
+                onIgnoreSuggestion={(messageId) =>
+                  setDismissedSuggestionIds((current) =>
+                    current.includes(messageId)
+                      ? current
+                      : [...current, messageId]
+                  )
+                }
+              />
+            </div>
+          </Fragment>
         );
       })}
     </div>

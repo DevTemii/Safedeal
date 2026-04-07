@@ -1,10 +1,11 @@
-import { cn } from "@/lib/utils";
+import { DealSuggestionCard } from "@/components/chat/deal-suggestion-card";
 import type { ChatMessageViewModel, MessageMetadata } from "@/lib/chat/types";
-import { SystemMessage } from "@/components/chat/system-message";
+import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
   currentUserId: string;
   message: ChatMessageViewModel;
+  onIgnoreSuggestion?: (messageId: string) => void;
 }
 
 function readText(metadata: MessageMetadata, key: string) {
@@ -54,16 +55,16 @@ function EventCard({
   title: string;
 }) {
   return (
-    <div className="max-w-[280px] rounded-[18px] border border-[#e7e7e7] bg-white px-4 py-3 shadow-[0px_8px_24px_rgba(0,0,0,0.05)]">
+    <div className="w-full max-w-[283px] rounded-tl-[13px] rounded-tr-[13px] rounded-bl-[13px] border border-[#E6E6E6] bg-[#F8F8F8] px-3 py-[10px] shadow-[0px_2px_18px_rgba(0,0,0,0.06)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm text-white"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm text-white"
             style={{ backgroundColor: accent }}
           >
             •
           </span>
-          <p className="text-[13px] font-semibold leading-5 text-[#171616]">
+          <p className="text-[12px] font-semibold leading-[18px] text-[#0F0F0F]">
             {title}
           </p>
         </div>
@@ -81,11 +82,11 @@ function EventCard({
       </div>
 
       {body ? (
-        <p className="mt-3 text-[13px] leading-5 text-[#171616]">{body}</p>
+        <p className="mt-2 text-[12px] leading-[18px] text-[#0F0F0F]">{body}</p>
       ) : null}
 
       {description ? (
-        <p className="mt-1 text-[12px] leading-5 text-[#878787]">
+        <p className="mt-1 text-[12px] leading-[18px] text-[#979797]">
           {description}
         </p>
       ) : null}
@@ -93,78 +94,38 @@ function EventCard({
   );
 }
 
-function DealSuggestionCard({ metadata }: { metadata: MessageMetadata }) {
-  const title =
-    readText(metadata, "title") ??
-    readText(metadata, "dealTitle") ??
-    "Suggested deal";
-  const amount =
-    readText(metadata, "amountLabel") ??
-    readText(metadata, "amount") ??
-    readText(metadata, "priceLabel");
-  const timing =
-    readText(metadata, "targetDateLabel") ??
-    readText(metadata, "deliveryWindow") ??
-    readText(metadata, "timing");
-
-  return (
-    <div className="max-w-[285px] rounded-[18px] border border-[#3c4bff] bg-[#f6f7fb] px-4 py-4 shadow-[0px_12px_28px_rgba(0,0,0,0.08)]">
-      <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef0ff] text-[#002de3]">
-          ✦
-        </span>
-        <div>
-          <p className="text-[13px] font-semibold leading-5 text-[#171616]">
-            Suggested
-          </p>
-          <p className="text-[12px] leading-4 text-[#878787]">
-            Review the deal details before creating it.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] leading-5 text-[#171616]">
-        <span>{title}</span>
-        {amount ? <span className="text-[#878787]">•</span> : null}
-        {amount ? <span>{amount}</span> : null}
-        {timing ? <span className="text-[#878787]">•</span> : null}
-        {timing ? <span>{timing}</span> : null}
-      </div>
-
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          className="rounded-full bg-[#002de3] px-4 py-2 text-[11px] font-semibold text-white"
-          type="button"
-        >
-          Create Deal
-        </button>
-        <button
-          className="rounded-full px-2 py-2 text-[11px] font-medium text-[#171616]"
-          type="button"
-        >
-          Ignore
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export function MessageBubble({ currentUserId, message }: MessageBubbleProps) {
+export function MessageBubble({
+  currentUserId,
+  message,
+  onIgnoreSuggestion,
+}: MessageBubbleProps) {
   const isOwnMessage = message.senderId === currentUserId;
   const alignmentClass = isOwnMessage ? "justify-end" : "justify-start";
 
   switch (message.type) {
     case "system":
-      return <SystemMessage>{message.body}</SystemMessage>;
+      return (
+        <div className="flex justify-center">
+          <div className="rounded-[22px] border border-[#979797] bg-white px-3 py-1">
+            <span className="text-[10px] font-semibold leading-none text-black">
+              {message.body}
+            </span>
+          </div>
+        </div>
+      );
     case "deal_suggestion":
       return (
-        <div className={cn("flex px-4", alignmentClass)}>
-          <DealSuggestionCard metadata={message.metadata} />
+        <div className="flex justify-end">
+          <DealSuggestionCard
+            body={message.body}
+            metadata={message.metadata}
+            onIgnore={() => onIgnoreSuggestion?.(message.id)}
+          />
         </div>
       );
     case "deal_card":
       return (
-        <div className={cn("flex px-4", alignmentClass)}>
+        <div className={cn("flex", alignmentClass)}>
           <EventCard
             accent="#002DE3"
             body={message.body}
@@ -180,7 +141,7 @@ export function MessageBubble({ currentUserId, message }: MessageBubbleProps) {
       );
     case "payment_event":
       return (
-        <div className={cn("flex px-4", alignmentClass)}>
+        <div className={cn("flex", alignmentClass)}>
           <EventCard
             accent="#0B57D0"
             body={message.body}
@@ -192,7 +153,7 @@ export function MessageBubble({ currentUserId, message }: MessageBubbleProps) {
       );
     case "delivery_event":
       return (
-        <div className={cn("flex px-4", alignmentClass)}>
+        <div className={cn("flex", alignmentClass)}>
           <EventCard
             accent="#21764D"
             body={message.body}
@@ -205,13 +166,13 @@ export function MessageBubble({ currentUserId, message }: MessageBubbleProps) {
     case "text":
     default:
       return (
-        <div className={cn("flex px-4", alignmentClass)}>
+        <div className={cn("flex", alignmentClass)}>
           <div
             className={cn(
-              "max-w-[280px] rounded-[18px] px-4 py-2 text-[13px] leading-6 shadow-[0px_4px_12px_rgba(0,0,0,0.02)]",
+              "w-fit max-w-[280px] px-[10px] text-[12px] font-normal leading-[24px] shadow-[0px_1px_2px_rgba(0,0,0,0.02)]",
               isOwnMessage
-                ? "rounded-br-[6px] bg-[#002de3] text-white"
-                : "rounded-bl-[6px] bg-[#e9e9ea] text-[#0f0f0f]"
+                ? "rounded-bl-[16px] rounded-tl-[16px] rounded-tr-[16px] rounded-br-[4px] bg-[#002DE3] text-white"
+                : "rounded-br-[16px] rounded-tl-[16px] rounded-tr-[16px] rounded-bl-[4px] bg-[#E6E6E6] py-[2px] text-[#0F0F0F]"
             )}
           >
             {message.body}
