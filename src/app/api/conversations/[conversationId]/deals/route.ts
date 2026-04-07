@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildDealCardMetadata } from "@/lib/chat/deal-messages";
 import {
   jsonError,
   parseNonEmptyText,
@@ -43,6 +44,47 @@ export async function POST(request: Request, context: RouteContext) {
       .single();
 
     throwIfDatabaseError(error, "Unable to create the deal.");
+
+    const { error: messageInsertError } = await supabase.from("messages").insert([
+      {
+        body: "Draft deal created",
+        conversation_id: deal.conversation_id,
+        metadata: {
+          type: "system",
+        },
+        sender_id: profile.id,
+      },
+      {
+        body: "Deal created",
+        conversation_id: deal.conversation_id,
+        metadata: buildDealCardMetadata({
+          amountMinor: deal.amount_minor,
+          buyerId: deal.buyer_id,
+          dealId: deal.id,
+          deliveryLabel: deal.description,
+          sellerId: deal.seller_id,
+          status: "draft",
+          title: deal.title,
+        }),
+        sender_id: profile.id,
+      },
+    ]);
+
+    if (messageInsertError) {
+      const { error: rollbackError } = await supabase
+        .from("deals")
+        .delete()
+        .eq("id", deal.id);
+
+      if (rollbackError) {
+        console.error(
+          "[conversations.deals] unable to roll back draft deal after timeline insert failure:",
+          rollbackError
+        );
+      }
+
+      throw messageInsertError;
+    }
 
     return NextResponse.json(
       {
