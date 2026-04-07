@@ -60,7 +60,10 @@ contract SafeDealEscrow {
 
     event DealDisputed(uint256 indexed dealId, address indexed raisedBy);
 
-    function createDeal(address seller, address token, uint256 amount, uint64 deadline) external returns (uint256 dealId) {
+    function createDeal(address seller, address token, uint256 amount, uint64 deadline)
+        external
+        returns (uint256 dealId)
+    {
         if (seller == address(0)) revert InvalidSeller();
         if (token == address(0)) revert InvalidToken();
         if (amount == 0) revert InvalidAmount();

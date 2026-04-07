@@ -76,7 +76,7 @@ contract SafeDealEscrowTest is Test {
         vm.prank(buyer);
         escrow.fundDeal(dealId);
 
-        (, , , , , SafeDealEscrow.DealStatus storedStatus, , uint64 fundedAt, , , ) = escrow.deals(dealId);
+        (,,,,, SafeDealEscrow.DealStatus storedStatus,, uint64 fundedAt,,,) = escrow.deals(dealId);
 
         assertEq(token.balanceOf(address(escrow)), DEAL_AMOUNT);
         assertEq(token.balanceOf(buyer), buyerBalanceBefore - DEAL_AMOUNT);
@@ -102,8 +102,7 @@ contract SafeDealEscrowTest is Test {
         vm.prank(buyer);
         escrow.releaseDeal(dealId);
 
-        (, , , , , SafeDealEscrow.DealStatus storedStatus, , , uint64 deliveredAt, , uint64 releasedAt) =
-            escrow.deals(dealId);
+        (,,,,, SafeDealEscrow.DealStatus storedStatus,,, uint64 deliveredAt,, uint64 releasedAt) = escrow.deals(dealId);
 
         assertEq(token.balanceOf(address(escrow)), 0);
         assertEq(token.balanceOf(seller), sellerBalanceBefore + DEAL_AMOUNT);
@@ -119,7 +118,7 @@ contract SafeDealEscrowTest is Test {
         vm.prank(buyer);
         escrow.raiseDispute(buyerRaisedDealId);
 
-        (, , , , , SafeDealEscrow.DealStatus buyerRaisedStatus, , , , uint64 buyerDisputedAt, ) =
+        (,,,,, SafeDealEscrow.DealStatus buyerRaisedStatus,,,, uint64 buyerDisputedAt,) =
             escrow.deals(buyerRaisedDealId);
 
         assertEq(uint8(buyerRaisedStatus), uint8(SafeDealEscrow.DealStatus.Disputed));
@@ -130,7 +129,7 @@ contract SafeDealEscrowTest is Test {
         vm.prank(seller);
         escrow.raiseDispute(sellerRaisedDealId);
 
-        (, , , , , SafeDealEscrow.DealStatus sellerRaisedStatus, , , , uint64 sellerDisputedAt, ) =
+        (,,,,, SafeDealEscrow.DealStatus sellerRaisedStatus,,,, uint64 sellerDisputedAt,) =
             escrow.deals(sellerRaisedDealId);
 
         assertEq(uint8(sellerRaisedStatus), uint8(SafeDealEscrow.DealStatus.Disputed));
@@ -295,10 +294,7 @@ contract SafeDealEscrowTest is Test {
 
         vm.prank(seller);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SafeDealEscrow.DisputeNotAllowed.selector,
-                SafeDealEscrow.DealStatus.Completed
-            )
+            abi.encodeWithSelector(SafeDealEscrow.DisputeNotAllowed.selector, SafeDealEscrow.DealStatus.Completed)
         );
         escrow.raiseDispute(dealId);
     }
