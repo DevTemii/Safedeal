@@ -1,3 +1,4 @@
+import { DealCardMessage } from "@/components/chat/deal-card-message";
 import { DealSuggestionCard } from "@/components/chat/deal-suggestion-card";
 import type { ChatMessageViewModel, MessageMetadata } from "@/lib/chat/types";
 import { cn } from "@/lib/utils";
@@ -137,16 +138,9 @@ export function MessageBubble({
     case "deal_card":
       return (
         <div className={cn("flex", alignmentClass)}>
-          <EventCard
-            accent="#002DE3"
-            body={message.body}
-            description={readText(message.metadata, "summary")}
-            status={readStatus(message.metadata)}
-            title={
-              readText(message.metadata, "title") ??
-              readText(message.metadata, "dealTitle") ??
-              "Deal summary"
-            }
+          <DealCardMessage
+            currentUserId={currentUserId}
+            metadata={message.metadata}
           />
         </div>
       );

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAddress } from "viem";
 import {
+  buildDealCardMetadata,
+  buildPaymentEventMetadata,
+} from "@/lib/chat/deal-messages";
+import {
   getDealCreatedLog,
   getDealFundedLog,
   parseTransactionHash,
@@ -193,6 +197,38 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (updatedDealError || !updatedDeal) {
       throw updatedDealError ?? new ApiError(409, "Deal funding has already been confirmed.");
+    }
+
+    const { error: messageInsertError } = await actionContext.supabase
+      .from("messages")
+      .insert([
+        {
+          body: "Payment secured",
+          conversation_id: actionContext.deal.conversation_id,
+          metadata: buildPaymentEventMetadata({
+            description: "Funds are now held in escrow until delivery is confirmed.",
+            status: "funded",
+          }),
+          sender_id: actionContext.profile.id,
+        },
+        {
+          body: "Deal updated",
+          conversation_id: actionContext.deal.conversation_id,
+          metadata: buildDealCardMetadata({
+            amountMinor: actionContext.deal.amount_minor,
+            buyerId: actionContext.deal.buyer_id,
+            dealId: actionContext.deal.id,
+            deliveryLabel: actionContext.deal.description,
+            sellerId: actionContext.deal.seller_id,
+            status: "funded",
+            title: actionContext.deal.title,
+          }),
+          sender_id: actionContext.profile.id,
+        },
+      ]);
+
+    if (messageInsertError) {
+      console.error("[fund.confirm] unable to append chat messages:", messageInsertError);
     }
 
     return NextResponse.json({
