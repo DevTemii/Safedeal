@@ -3,9 +3,18 @@
 import Link from "next/link";
 import type { MessageMetadata } from "@/lib/chat/types";
 
+export interface ReviewDealDraft {
+  amount: string | null;
+  delivery: string | null;
+  notes: string | null;
+  seller: string | null;
+  title: string | null;
+}
+
 interface DealSuggestionCardProps {
   body: string;
   metadata: MessageMetadata;
+  onCreateDeal?: (draft: ReviewDealDraft) => void;
   onIgnore: () => void;
 }
 
@@ -39,18 +48,49 @@ function getSummaryLine(body: string, metadata: MessageMetadata) {
 
 function getCreateDealHref(metadata: MessageMetadata) {
   return (
+    readText(metadata, "reviewDealHref") ??
     readText(metadata, "createDealHref") ??
     readText(metadata, "dealReviewHref") ??
     readText(metadata, "href")
   );
 }
 
+function getReviewDealDraft(body: string, metadata: MessageMetadata): ReviewDealDraft {
+  return {
+    amount:
+      readText(metadata, "amount") ??
+      readText(metadata, "amountLabel") ??
+      readText(metadata, "priceLabel"),
+    delivery:
+      readText(metadata, "delivery") ??
+      readText(metadata, "deliveryWindow") ??
+      readText(metadata, "targetDateLabel") ??
+      readText(metadata, "timing"),
+    notes:
+      readText(metadata, "notes") ??
+      readText(metadata, "description") ??
+      readText(metadata, "summaryNotes"),
+    seller:
+      readText(metadata, "seller") ??
+      readText(metadata, "sellerName") ??
+      readText(metadata, "displayName"),
+    title:
+      readText(metadata, "title") ??
+      readText(metadata, "dealTitle") ??
+      readText(metadata, "item"),
+  };
+}
+
 export function DealSuggestionCard({
   body,
   metadata,
+  onCreateDeal,
   onIgnore,
 }: DealSuggestionCardProps) {
   const createDealHref = getCreateDealHref(metadata);
+  const promptText =
+    readText(metadata, "prompt") ?? "Looks like a deal - create one?";
+  const reviewDealDraft = getReviewDealDraft(body, metadata);
   const summaryLine = getSummaryLine(body, metadata);
 
   return (
@@ -78,6 +118,10 @@ export function DealSuggestionCard({
       </div>
 
       <p className="mt-[6px] line-clamp-2 text-[12px] leading-[18px] text-[#0F0F0F]">
+        {promptText}
+      </p>
+
+      <p className="mt-[2px] line-clamp-2 text-[12px] leading-[18px] text-[#0F0F0F]">
         {summaryLine}
       </p>
 
@@ -92,6 +136,7 @@ export function DealSuggestionCard({
         ) : (
           <button
             className="inline-flex h-6 items-center justify-center rounded-[16px] bg-[#002DE3] px-[11px] text-[9px] font-bold leading-[24px] text-white"
+            onClick={() => onCreateDeal?.(reviewDealDraft)}
             type="button"
           >
             Create Deal

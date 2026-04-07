@@ -21,20 +21,31 @@ function readStatus(metadata: MessageMetadata) {
   );
 }
 
+function formatStatusLabel(status: string | null) {
+  if (!status) {
+    return null;
+  }
+
+  return status
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function statusBadgeClass(status: string | null) {
   switch (status?.toLowerCase()) {
-    case "funded":
-    case "secured":
-    case "confirmed":
-    case "completed":
-      return "bg-[#e9f7ef] text-[#21764d]";
-    case "pending":
+    case "draft":
+    case "approved":
+      return "bg-[#eff2ff] text-[#2f48d6]";
+    case "funding_pending":
     case "awaiting funding":
     case "awaiting_funding":
-    case "submitted":
       return "bg-[#fff3dc] text-[#9c6a15]";
+    case "funded":
+    case "delivered":
+    case "completed":
+      return "bg-[#e9f7ef] text-[#21764d]";
     case "disputed":
-    case "open":
       return "bg-[#ffe7e7] text-[#b34040]";
     default:
       return "bg-[#eff2ff] text-[#2f48d6]";
@@ -76,7 +87,7 @@ function EventCard({
               statusBadgeClass(status)
             )}
           >
-            {status}
+            {formatStatusLabel(status)}
           </span>
         ) : null}
       </div>
