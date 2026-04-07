@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { ChatActionBar } from "@/components/chat/chat-action-bar";
 import { ChatHeader } from "@/components/chat/chat-header";
-import { MessageInput } from "@/components/chat/message-input";
+import { MessageInputBar } from "@/components/chat/message-input-bar";
 import { MessageList } from "@/components/chat/message-list";
 import {
   getMessageType,
@@ -138,11 +137,10 @@ export default async function ChatPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="mx-auto flex min-h-screen max-w-md flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col bg-white">
         <ChatHeader conversation={headerData} />
         <MessageList currentUserId={profile.id} messages={messages} />
-        <ChatActionBar />
-        <MessageInput />
+        <MessageInputBar />
       </div>
     </main>
   );
